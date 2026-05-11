@@ -3,56 +3,65 @@ package ioc
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/emicklei/go-restful/v3"
+	//"github.com/gin-gonic/gin"
 )
 
-type ApiHandlerController interface {
+// type ApiHandlerController interface {
+// 	IocObject
+// 	Registry(*gin.RouterGroup)
+// }
+
+var (
+	ApiNamespace = "apis"
+)
+
+type ApiGoRestfulInterface interface {
 	IocObject
-	Registry(*gin.RouterGroup)
+	Registry(*restful.WebService)
 }
 
-var ApiController = map[string]ApiHandlerController{}
+func RegsitryApi(obj IocObject) {
 
-func InitApiController(rootPath string, r *gin.Engine) error {
-	fmt.Println("初始化ioc.ApiController--------------")
-	for k, v := range ApiController {
-		err := v.Init()
+	RegistryObjectWithNS(ApiNamespace, obj)
+}
 
-		if err != nil {
-			return fmt.Errorf("%s InitApiController Error: %s", k, err.Error())
+func GetApi(name string) IocObject {
+
+	return GetApiWithVersion(name, DEFAULT_VERSION)
+
+}
+
+func GetApiWithVersion(name, version string) IocObject {
+
+	return GetObjectWithNS(ApiNamespace, name, version)
+
+}
+
+func ShowApis() []string {
+	return store.Namespace(ApiNamespace).ObjectUids()
+}
+
+func LoadGoRestfulRouter(path_prefix string, rc *restful.Container) {
+
+	store.Namespace(ApiNamespace).ForEach(func(obj IocObject) {
+
+		//断言为ApiGoRestfulInterface接口类型
+		api, ok := obj.(ApiGoRestfulInterface)
+
+		if !ok {
+			return
 		}
 
-		router := r.Group(rootPath + "/" + v.Name())
-		fmt.Printf("key:%s Value:%#v Path:%s\n", k, v, rootPath+"/"+v.Name())
-		v.Registry(router)
-	}
-	return nil
+		ws := new(restful.WebService)
 
-}
+		//Consumes限制客户请求格式类型，Produces限制服务端响应格式类型
+		ws.Path(fmt.Sprintf("%s %s", api.Version(), api.Name())).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
 
-func GetApiHandlerController(NAME string) ApiHandlerController {
+		api.Registry(ws)
 
-	if v, ok := ApiController[NAME]; ok {
-		return v
-	}
+		rc.Add(ws)
 
-	panic("GET ApiHandlerController failure...!")
+	})
 
-}
-
-func ShowApiHandlerControllers() []string {
-	names := []string{}
-
-	for k, _ := range ApiController {
-
-		names = append(names, k)
-
-	}
-	return names
-
-}
-
-func RegistryApiHandlerController(obj ApiHandlerController) {
-
-	ApiController[obj.Name()] = obj
 }

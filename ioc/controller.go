@@ -1,45 +1,27 @@
 package ioc
 
-import "fmt"
-
-var Controller = map[string]IocObject{}
-
-func InitController() error {
-	fmt.Println("初始化ioc.Controller--------------")
-	for k, v := range Controller {
-
-		fmt.Printf("key:%s Value:%#v\n", k, v)
-		err := v.Init()
-		if err != nil {
-			return fmt.Errorf("%s Init Controller Error: %s", k, err.Error())
-		}
-	}
-
-	return nil
-}
-
-func GetController(Name string) IocObject {
-
-	if v, ok := Controller[Name]; ok {
-		return v
-	}
-
-	panic("ioc.Getcontroller failure!")
-}
-
-func ShowController() []string {
-
-	names := []string{}
-	for k, _ := range Controller {
-
-		names = append(names, k)
-
-	}
-
-	return names
-
-}
+var (
+	ControllerNamespace = "controllers"
+)
 
 func RegistryController(obj IocObject) {
-	Controller[obj.Name()] = obj
+
+	RegistryObjectWithNS(ControllerNamespace, obj)
+
+}
+
+func GetController(name string) IocObject {
+	return GetControllerWithVersion(name, DEFAULT_VERSION)
+
+}
+
+func GetControllerWithVersion(name, version string) IocObject {
+
+	return GetObjectWithNS(ControllerNamespace, name, version)
+}
+
+func ShowControllers() []string {
+
+	return store.st[ControllerNamespace].ObjectUids()
+
 }
