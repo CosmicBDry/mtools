@@ -21,7 +21,7 @@ type ApiGoRestfulInterface interface {
 	Registry(*restful.WebService)
 }
 
-func RegsitryApi(obj IocObject) {
+func RegistryApi(obj IocObject) {
 
 	RegistryObjectWithNS(ApiNamespace, obj)
 }
