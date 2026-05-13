@@ -42,7 +42,7 @@ func ShowApis() []string {
 	return store.Namespace(ApiNamespace).ObjectUids()
 }
 
-func LoadGoRestfulRouter(path_prefix string, rc *restful.Container) {
+func LoadGoRestfulRouterApi(path_prefix string, rc *restful.Container) {
 
 	store.Namespace(ApiNamespace).ForEach(func(obj IocObject) {
 
