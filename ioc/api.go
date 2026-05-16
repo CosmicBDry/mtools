@@ -56,7 +56,7 @@ func LoadGoRestfulRouterApi(path_prefix string, rc *restful.Container) {
 		ws := new(restful.WebService)
 
 		//Consumes限制客户请求格式类型，Produces限制服务端响应格式类型
-		ws.Path(fmt.Sprintf("%s %s", api.Version(), api.Name())).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
+		ws.Path(fmt.Sprintf("%s/%s/%s", path_prefix, api.Version(), api.Name())).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
 
 		api.Registry(ws)
 
